@@ -58,8 +58,6 @@ public class Tanque {
         this.images = images;
     }
     
-    
-    
     public void addImage(String image){
         for (int i = 0; i < 4; i++) 
             if(images[i] == null){

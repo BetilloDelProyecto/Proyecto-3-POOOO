@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Mapa implements Serializable {
     ArrayList<Bloque> bloques = new ArrayList<>();
     ArrayList<Tanque> eTanks = new ArrayList<>();
-    
+    Bloque Aguila = new BloqueFactory().createBloque("eagle", 24, 12);
     public Mapa(MapaBuilder mapaBuilder) {
         this.bloques = mapaBuilder.getBloques();
     }
@@ -44,6 +44,14 @@ public class Mapa implements Serializable {
 
     public void seteTanks(ArrayList<Tanque> eTanks) {
         this.eTanks = eTanks;
+    }
+
+    public Bloque getAguila() {
+        return Aguila;
+    }
+
+    public void setAguila(Bloque Aguila) {
+        this.Aguila = Aguila;
     }
     
     

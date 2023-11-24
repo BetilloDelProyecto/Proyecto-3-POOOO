@@ -26,7 +26,7 @@ public class CampoJuego extends javax.swing.JFrame {
     Mapa mapaActual;
     GestorTankEnemigo gestorETank;
     ThreadGenerarTanques thGenerarTanques = new ThreadGenerarTanques(this);
-    
+    ArrayList<ThreadTanqueEnemigo> enemigos = new ArrayList<>();
     public CampoJuego() {
         initComponents();
         setFocusable(true);
@@ -38,8 +38,8 @@ public class CampoJuego extends javax.swing.JFrame {
         generaMatriz();
         cargarMapas();
         mapaActual = mapas.get(nivel);
-        buildMapa();
         setFriendlyTank();
+        buildMapaAux();
         moverTanque();
         started = false;
         
@@ -117,6 +117,7 @@ public class CampoJuego extends javax.swing.JFrame {
         fTank.setPosY(pos[1]);
         fTank.setOrientacion("UP");
         pintarTanque(fTank.getImages()[fTank.getPosImagen(fTank.getOrientacion())], fTank.getPosX(), fTank.getPosY());
+        mapaActual.getETanks().add(fTank);
     }
     
     public int[] getPosLibreMapa(){
@@ -136,13 +137,12 @@ public class CampoJuego extends javax.swing.JFrame {
     }
     
     public void moverTanqueAux(String command,int posX,int posY){
-        if(validarMovimiento(posX,posY)){
+        if(validarMovimiento(posX,posY,fTank)){
+            limpiarMapa(fTank.getPosX(), fTank.getPosY());
             ICommand iCommand = fTank.getCommand(command);
             iCommand.execute(fTank);
-            buildMapa();
             pintarTanque(fTank.getImages()[fTank.getPosImagen(fTank.getOrientacion())], fTank.getPosX(), fTank.getPosY());
         }else{
-            buildMapa();
             fTank.setOrientacion(command);
             pintarTanque(fTank.getImages()[fTank.getPosImagen(fTank.getOrientacion())], fTank.getPosX(), fTank.getPosY());
         }
@@ -154,10 +154,9 @@ public class CampoJuego extends javax.swing.JFrame {
             @Override
             public void keyTyped(KeyEvent e) {
                 if(e.getKeyChar() == KeyEvent.VK_ENTER && !started){
-                    System.out.println("LE DI ENTER");
                     started = true;
                     thGenerarTanques.start();
-                }else if (e.getKeyChar() == 'a' || e.getKeyChar() == 'A') {
+                }else if (e.getKeyChar() == 'a' || e.getKeyChar() == 'A'){
                     moverTanqueAux("LEFT",fTank.getPosX(),fTank.getPosY()-1);
                 }else if(e.getKeyChar() == 'd' || e.getKeyChar() == 'D'){
                     moverTanqueAux("RIGHT",fTank.getPosX(),fTank.getPosY()+1);
@@ -167,7 +166,6 @@ public class CampoJuego extends javax.swing.JFrame {
                     moverTanqueAux("DOWN",fTank.getPosX()+1,fTank.getPosY());
                 } 
             }
-
             @Override
             public void keyPressed(KeyEvent e) {}
             @Override
@@ -175,22 +173,26 @@ public class CampoJuego extends javax.swing.JFrame {
         });
     }
 
-    public boolean validarConTanques(int posX,int posY){
+    public boolean validarConTanques(int posX,int posY, Tanque tanqueRecibido){
+        
         for(Tanque eTank : mapaActual.getETanks()){
-            if(eTank.getPosX() == posX && eTank.getPosY() == posY){
-                return false;
-            }else if(eTank.getPosX() == posX && eTank.getPosY()+1 == posY){
-                return false;
-            }else if( eTank.getPosX()+1 == posX && eTank.getPosY() == posY){
-                return false;
-            }else if(eTank.getPosX()+1 == posX && eTank.getPosY()+1 == posY ){
-                return false;
+            if(eTank != tanqueRecibido){
+                if(eTank.getPosX() == posX && eTank.getPosY() == posY){
+                    return false;
+                }else if(eTank.getPosX() == posX && eTank.getPosY()+1 == posY){
+                    return false;
+                }else if( eTank.getPosX()+1 == posX && eTank.getPosY() == posY){
+                    return false;
+                }else if(eTank.getPosX()+1 == posX && eTank.getPosY()+1 == posY ){
+                    return false;
+                }
             }
+            
         }
         return true;
     }
     
-    private boolean validarMovimiento(int posX, int posY){
+    public boolean validarMovimiento(int posX, int posY, Tanque tanqueRecibido){
         if(posX >= 25 || posX < 0 || posY < 0 || posY >= 25)
             return false;
         for(Bloque b : mapaActual.getBloques())
@@ -198,17 +200,18 @@ public class CampoJuego extends javax.swing.JFrame {
                 if(b.getPosX() == posX && b.getPosY() == posY){
                     return false;
                 }else if(b.getPosX() == posX && b.getPosY() == posY+1){
-                    return false;
+                   return false;
                 }else if( b.getPosX() == posX+1 && b.getPosY() == posY){
-                    return false;
+                   return false;
                 }else if(b.getPosX() == posX+1 && b.getPosY() == posY+1 ){
-                    return false;
+                   return false;
                 }
-        return validarConTanques(posX, posY) && validarConTanques(posX, posY+1) && validarConTanques(posX+1, posY) && validarConTanques(posX+1, posY+1);
+                
+        return validarConTanques(posX, posY, tanqueRecibido) && validarConTanques(posX, posY+1, tanqueRecibido) && validarConTanques(posX+1, posY, tanqueRecibido) && validarConTanques(posX+1, posY+1, tanqueRecibido);
         
     }
     
-    private BufferedImage toBufferedImage(Image img) {
+    public BufferedImage toBufferedImage(Image img) {
         if (img instanceof BufferedImage)
             return (BufferedImage) img;
         BufferedImage bufferedImage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
@@ -219,6 +222,7 @@ public class CampoJuego extends javax.swing.JFrame {
     }
     
     public void pintarTanque(String ruta,int posX,int posY){
+        System.out.println("Ruta:" + ruta + "x: " + posX + " Y:"+ posY);
         String rutaImagen = ruta; 
         ImageIcon imagenIcono = new ImageIcon(rutaImagen);
         imagenIcono = resizeGifIcon(imagenIcono, 60, 60);
@@ -252,7 +256,7 @@ public class CampoJuego extends javax.swing.JFrame {
                     }
                 }
             }
-        } else {
+        }else {
             System.out.println("La ruta especificada no es una carpeta.");
         }
     }
@@ -272,23 +276,36 @@ public class CampoJuego extends javax.swing.JFrame {
         return new ImageIcon(resizedImg);
     }
     
-    public void buildMapa(){
-        limpiarMapa();
-        for(Bloque b : mapaActual.getBloques())
+    public void buildMapaAux(){
+        Bloque aguila = mapaActual.getAguila();
+        pintarTanque(aguila.getImagen(), aguila.getPosX(), aguila.getPosY());
+        for(Bloque b : mapaActual.getBloques()){
             if(b.getPosX() != -1 && b.getPosY() != -1 ){
-                JLabel lbl = matriz[b.getPosX()][b.getPosY()];
-                cambiarImagenDeLabel(b.getImagen(), lbl);
-            }
-        for(Tanque eTank : mapaActual.getETanks())
-            pintarTanque(eTank.getImages()[eTank.getPosImagen(eTank.getOrientacion())], eTank.getPosX(), eTank.getPosY());
-    }
-    
-    public void limpiarMapa(){
-        for (int i = 0; i < 26; i++) {
-            for (int j = 0; j < 26; j++) {
-                matriz[i][j].setIcon(null);
+                JLabel lb = new JLabel("");
+                lb.setForeground(Color.red);
+                cambiarImagenDeLabel(b.getImagen(), lb);
+                lb.setLocation(b.getPosY()*30,b.getPosX()*30);
+                lb.setSize(30,30);
+                pnlCampo.add(lb);
+                pnlCampo.revalidate();
+                pnlCampo.repaint();
+                
             }
         }
+    }
+    public void buildMapa(){
+        pintarTanque(fTank.getImages()[fTank.getPosImagen(fTank.getOrientacion())], fTank.getPosX(), fTank.getPosY());
+        for(Tanque eTank : mapaActual.getETanks())
+            pintarTanque(eTank.getImages()[eTank.getPosImagen(eTank.getOrientacion())], eTank.getPosX(), eTank.getPosY());
+        
+        
+    }
+    
+    public void limpiarMapa(int posX, int posY){
+        matriz[posX][posY].setIcon(null);
+        matriz[posX+1][posY].setIcon(null);
+        matriz[posX][posY+1].setIcon(null);
+        matriz[posX+1][posY+1].setIcon(null);
     }
      
     public int[] getPosLibreEnemigo(){
@@ -314,9 +331,11 @@ public class CampoJuego extends javax.swing.JFrame {
         eTank.setVelocidadDisparo(configuracion.getVelocidadDisparo());
         eTank.setVelocidadMovimiento(configuracion.getVelocidadMovimiento());
         eTank.setOrientacion("DOWN");
-        System.out.println("IMAGEN DEL TANQUE: " +eTank.getImages()[eTank.getPosImagen(eTank.getOrientacion())] );
         pintarTanque(eTank.getImages()[eTank.getPosImagen(eTank.getOrientacion())], eTank.getPosX(), eTank.getPosY());
         mapaActual.addTanque((Tanque)eTank);
+        ThreadTanqueEnemigo tte = new ThreadTanqueEnemigo(this, eTank);
+        tte.start();
+        enemigos.add(tte);
     }
     
     public static void main(String args[]) {

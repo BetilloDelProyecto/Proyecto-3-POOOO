@@ -256,12 +256,8 @@ public class Proyecto3POO {
 
 
         .agregarBloque(bFactory.createBloque("brick", 24, 11))
-        .agregarBloque(bFactory.createBloque("eagle", 24, 12))
-        .agregarBloque(bFactory.createBloque("eagle", 24, 13))
         .agregarBloque(bFactory.createBloque("brick", 24, 14))
         .agregarBloque(bFactory.createBloque("brick", 25, 11))
-        .agregarBloque(bFactory.createBloque("eagle", 25, 12))
-        .agregarBloque(bFactory.createBloque("eagle", 25, 13))
         .agregarBloque(bFactory.createBloque("brick", 25, 14))
         .build();
        filemanager.FileManager.writeObject(mapa1, "Mapas\\mapa1.txt");

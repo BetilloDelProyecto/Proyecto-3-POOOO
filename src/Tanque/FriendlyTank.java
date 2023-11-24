@@ -17,15 +17,14 @@ public class FriendlyTank extends Tanque{
     
     public ICommand getCommand(String commandName) {           
         if (COMMANDS.containsKey(commandName.toUpperCase())) {               
-            try {   
-                   //retorna nueva isntancia de comando solicitado
+            try {  
                 return COMMANDS.get(commandName.toUpperCase()).newInstance();
             } catch (Exception e) {   
-                System.out.println("error en friendlytank ln 24");  
+                System.out.println("error en friendlytank ln 23");  
                 return null;
             }           
         }else {
-            System.out.println("no encontro el bucket friendlytank ln 28");   
+            System.out.println("no encontro el bucket friendlytank ln 27");   
         }
         return null;
     }
