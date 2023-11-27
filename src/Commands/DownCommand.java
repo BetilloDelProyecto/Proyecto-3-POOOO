@@ -15,6 +15,5 @@ public class DownCommand implements ICommand{
     public void execute(FriendlyTank tanque) {           
         tanque.setPosX(tanque.getPosX()+1);
         tanque.setOrientacion(COMMAND_NAME);
-        System.out.println("X: " + tanque.getPosX() + " Y: " + tanque.getPosY());
     } 
 }

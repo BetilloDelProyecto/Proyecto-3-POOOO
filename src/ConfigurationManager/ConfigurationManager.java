@@ -2,9 +2,19 @@ package ConfigurationManager;
 
 
 public class ConfigurationManager {
+    
     private static ConfigurationManager configurationManager;
-    private int velocidadDisparo;
-    private int velocidadMovimiento;
+    private int vDispSimple = 3000;
+    private int vDispRapido = 2000;
+    private int vDispFuerte = 2000;
+    private int vDispResistente = 2000;
+    
+    
+    private int vMovSimple = 2000;
+    private int vMovRapido = 1000;
+    private int vMovFuerte = 2000;
+    private int vMovResistente = 4000;
+    
     private int tiempoAparicion;
     
     private ConfigurationManager(){}
@@ -14,27 +24,41 @@ public class ConfigurationManager {
             configurationManager =  new ConfigurationManager();
         return configurationManager;
     }
-
-    public int getVelocidadDisparo() {
-        return velocidadDisparo;
-    }
-
-    public void setVelocidadDisparo(int velocidadDisparo) {
-        this.velocidadDisparo = velocidadDisparo;
-    }
-
-    public int getVelocidadMovimiento() {
-        return velocidadMovimiento;
-    }
-
-    public void setVelocidadMovimiento(int velocidadMovimiento) {
-        this.velocidadMovimiento = velocidadMovimiento;
-    }
-
     public int getTiempoAparicion() {
         return tiempoAparicion;
     }
-
+    
+    public int getVelDips(String tipo){
+        switch (tipo){
+            case "simple":
+                return vDispSimple;
+            case "rapido":
+                return vDispRapido;
+            case "fuerte":
+                return vDispFuerte;
+            case "resistente":
+                return vDispResistente;
+            default:
+                return 1000;
+        }
+    }
+    
+    public int getVelMov(String tipo){
+        switch (tipo){
+            case "simple":
+                return vMovSimple;
+            case "rapido":
+                return vMovRapido;
+            case "fuerte":
+                return vMovFuerte;
+            case "resistente":
+                return vMovResistente;
+            default:
+                return 1000;
+        }
+    }
+            
+    
     public void setTiempoAparicion(int tiempoAparicion) {
         this.tiempoAparicion = tiempoAparicion;
     }

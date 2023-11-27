@@ -66,6 +66,7 @@ public class Tanque {
             }
     }
     
+    
     public int getPosImagen(String orientacion){
         switch(orientacion){
             case "UP":

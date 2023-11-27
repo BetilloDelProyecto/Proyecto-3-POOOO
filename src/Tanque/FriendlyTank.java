@@ -14,7 +14,7 @@ public class FriendlyTank extends Tanque{
         registCommand("DOWN", DownCommand.class);
         registCommand("LEFT", LeftCommand.class);
     }
-    
+    //tqm betico
     public ICommand getCommand(String commandName) {           
         if (COMMANDS.containsKey(commandName.toUpperCase())) {               
             try {  

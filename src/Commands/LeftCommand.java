@@ -14,6 +14,5 @@ public class LeftCommand implements ICommand{
     public void execute(FriendlyTank tanque) {           
         tanque.setPosY(tanque.getPosY()-1);
         tanque.setOrientacion(COMMAND_NAME);
-        System.out.println("X: " + tanque.getPosX() + " Y: " + tanque.getPosY());
     } 
 }

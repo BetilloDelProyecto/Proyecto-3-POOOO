@@ -1,15 +1,17 @@
 package Bloque;
 
 import java.io.Serializable;
+import javax.swing.*;
 
 public class Bloque implements Serializable{
     int posX,posY;
     int vida;
     String imagen,tipo;
-    boolean destruible,traspasable;
+    boolean destruible,traspasable, baleable;
+    JLabel lbl;
     
     //----------------------------CONSTRUCTOR------------------------------
-    public Bloque(int posX, int posY, int vida, String imagen, String tipo,boolean destruible,boolean traspasable) {
+    public Bloque(int posX, int posY, int vida, String imagen, String tipo,boolean destruible,boolean traspasable, boolean baleable) {
         this.posX = posX;
         this.posY = posY;
         this.vida = vida;
@@ -17,6 +19,7 @@ public class Bloque implements Serializable{
         this.tipo = tipo;
         this.destruible = destruible;
         this.traspasable = traspasable;
+        this.baleable = baleable;
     }
     
     //------------------------------GET & SET------------------------------
@@ -28,7 +31,7 @@ public class Bloque implements Serializable{
         this.posX = posX;
     }
 
-    public boolean getDestruible() {
+    public boolean isDestruible() {
         return destruible;
     }
 
@@ -65,6 +68,16 @@ public class Bloque implements Serializable{
         return imagen;
     }
 
+    public boolean isBaleable() {
+        return baleable;
+    }
+
+    public void setBaleable(boolean baleable) {
+        this.baleable = baleable;
+    }
+
+    
+    
     public void setImagen(String imagen) {
         this.imagen = imagen;
     }
@@ -77,6 +90,21 @@ public class Bloque implements Serializable{
     public String toString() {
         return "Bloque{" + "posX=" + posX + ", posY=" + posY + ", vida=" + vida + ", imagen=" + imagen + ", tipo=" + tipo + ", destruible=" + destruible + ", traspasable=" + traspasable + '}';
     }
+
+    public JLabel getLbl() {
+        return lbl;
+    }
+
+    public void setLbl(JLabel lbl) {
+        this.lbl = lbl;
+    }
+    
+    public void morir(){
+        posX = -1;
+        posY = -1;
+        lbl.setIcon(null);
+        
+    }    
 
     
 

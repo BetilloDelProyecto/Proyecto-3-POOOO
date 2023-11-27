@@ -262,6 +262,11 @@ public class Proyecto3POO {
         .build();
        filemanager.FileManager.writeObject(mapa1, "Mapas\\mapa1.txt");
 
+       
+       
+       
+       
+       
         Mapa mapa2 = new MapaBuilder()
         .agregarBloque(bFactory.createBloque("steel", 0, 6))
         .agregarBloque(bFactory.createBloque("steel", 0, 7))
@@ -580,8 +585,10 @@ public class Proyecto3POO {
 	.agregarBloque(bFactory.createBloque("brick", 25, 22))
         .agregarBloque(bFactory.createBloque("brick",25 , 23))
         .build();
-        
         filemanager.FileManager.writeObject(mapa2, "Mapas\\mapa2.txt");
+        
+        
+        
         
         Mapa mapa3 = new MapaBuilder()
         .agregarBloque(bFactory.createBloque("steel", 0, 10))
@@ -614,8 +621,6 @@ public class Proyecto3POO {
         .agregarBloque(bFactory.createBloque("brick", 2, 11))
         .agregarBloque(bFactory.createBloque("brick", 2, 14))
         .agregarBloque(bFactory.createBloque("brick", 2, 15))
-        
-        
 
         .agregarBloque(bFactory.createBloque("brick", 3, 2))
         .agregarBloque(bFactory.createBloque("brick", 3, 3))
@@ -1235,8 +1240,6 @@ public class Proyecto3POO {
         filemanager.FileManager.writeObject(mapa4, "Mapas\\mapa4.txt");
         
         // </editor-fold>
-        
-        //Tanque t = new Tanque(1);
        
     
     }

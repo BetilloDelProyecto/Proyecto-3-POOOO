@@ -13,7 +13,7 @@ public class ThreadGenerarTanques extends Thread {
     
     public void run(){
         try {
-            while (cont < 1){
+            while (cont < 20){
                 // el cont 13 y 19 van a ser tanques rojos
                 ventana.generarEnemigo(tipoRandom());
                 cont++;

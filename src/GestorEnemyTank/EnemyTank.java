@@ -9,13 +9,15 @@ import javax.swing.JLabel;
 public class EnemyTank extends Tanque {
     int velocidadMovimiento;
     int velocidadDisparo;
+    String tipo;
     JLabel lblTank;
-    public EnemyTank(int vida,int posX,int posY,int velocidadMovimiento,int velocidadDisparo) {
+    public EnemyTank(int vida, int posX, int posY, int velocidadMovimiento, int velocidadDisparo, String tipo) {
         super(vida);
         this.setPosX(posX);
         this.setPosY(posY);
         this.velocidadMovimiento = velocidadMovimiento;
         this.velocidadDisparo = velocidadDisparo;
+        this.tipo = tipo;
     }
 
     public int getVelocidadMovimiento() {
@@ -41,9 +43,17 @@ public class EnemyTank extends Tanque {
     public void setLblTank(JLabel lblTank) {
         this.lblTank = lblTank;
     }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
     
     public EnemyTank clonar(){
-        EnemyTank t1 = new EnemyTank(this.velocidadDisparo, this.velocidadDisparo, this.velocidadDisparo, this.velocidadMovimiento, this.velocidadDisparo);
+        EnemyTank t1 = new EnemyTank(this.velocidadDisparo, this.velocidadDisparo, this.velocidadDisparo, this.velocidadMovimiento, this.velocidadDisparo, this.tipo);
         t1.setImages(this.getImages());
         t1.setLblTank(new JLabel());
         return t1;

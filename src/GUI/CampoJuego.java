@@ -1,6 +1,7 @@
 
 package GUI;
 
+import Bala.*;
 import Bloque.*;
 import Commands.*;
 import ConfigurationManager.*;
@@ -15,7 +16,6 @@ import java.util.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 
-
 public class CampoJuego extends javax.swing.JFrame {
     JLabel[][] matriz = new JLabel[26][26];
     ArrayList<Mapa> mapas = new ArrayList<>();
@@ -27,11 +27,13 @@ public class CampoJuego extends javax.swing.JFrame {
     GestorTankEnemigo gestorETank;
     ThreadGenerarTanques thGenerarTanques = new ThreadGenerarTanques(this);
     ArrayList<ThreadTanqueEnemigo> enemigos = new ArrayList<>();
+    ArrayList<ThreadBala> balas = new ArrayList<>();
+    
     public CampoJuego() {
         initComponents();
         setFocusable(true);
         gestorETank = new GestorTankEnemigo();
-        this.nivel = 0;
+        this.nivel = 3;
         this.setBackground(Color.black);
         this.setLayout(null);
         pnlCampo.setSize(780,780);
@@ -42,8 +44,6 @@ public class CampoJuego extends javax.swing.JFrame {
         buildMapaAux();
         moverTanque();
         started = false;
-        
-        
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -122,18 +122,24 @@ public class CampoJuego extends javax.swing.JFrame {
     
     public int[] getPosLibreMapa(){
         int[] pos = new int[2];
-        for (int i = 24; i >= 0; i--) {
-            for (int j = 0; j < 25; j++) {
-                if(matriz[i][j].getIcon() == null && matriz[i+1][j].getIcon() == null && matriz[i][j+1].getIcon() == null && matriz[i+1][j+1].getIcon() == null){
+        for (int i = 24; i >= 0; i--) 
+            for (int j = 0; j < 25; j++) 
+                if(!puntoUsado(i, j)&&!puntoUsado(i, j+1)&&!puntoUsado(i+1, j)&&!puntoUsado(i+1, j+1)){
                     pos[0] = i;
                     pos[1] = j;
                     return pos;
                 }
-            }
-        }
         pos[0] = -1;
         pos[1] = -1;                
         return pos;
+    }
+
+    public JPanel getPnlCampo() {
+        return pnlCampo;
+    }
+
+    public Mapa getMapaActual() {
+        return mapaActual;
     }
     
     public void moverTanqueAux(String command,int posX,int posY){
@@ -147,10 +153,38 @@ public class CampoJuego extends javax.swing.JFrame {
             pintarTanque(fTank.getImages()[fTank.getPosImagen(fTank.getOrientacion())], fTank.getPosX(), fTank.getPosY());
         }
     }
-     
+    
+    public static void setCenteredImage(JLabel label, String imagePath) {
+        try {
+            ImageIcon originalIcon = new ImageIcon(imagePath);
+            Image originalImage = originalIcon.getImage();
+
+            // Redimensionar la imagen a 15x15
+            int targetWidth = 15;
+            int targetHeight = 15;
+            Image resizedImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+
+            // Crear un nuevo ImageIcon con la imagen redimensionada
+            ImageIcon resizedIcon = new ImageIcon(resizedImage);
+
+            // Establecer el nuevo ImageIcon en el JLabel
+            label.setIcon(resizedIcon);
+
+            // Centrar la imagen en el JLabel
+            int x = (label.getWidth() - resizedIcon.getIconWidth()) / 2;
+            int y = (label.getHeight() - resizedIcon.getIconHeight()) / 2;
+            label.setIcon(new ImageIcon(resizedImage));  // Establecer de nuevo para asegurar el tamaño correcto
+            label.setHorizontalAlignment(JLabel.CENTER);
+            label.setVerticalAlignment(JLabel.CENTER);
+            label.setBounds(x, y, resizedIcon.getIconWidth(), resizedIcon.getIconHeight());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void moverTanque(){
+        CampoJuego c = this;
         this.addKeyListener(new KeyListener() {
-            
             @Override
             public void keyTyped(KeyEvent e) {
                 if(e.getKeyChar() == KeyEvent.VK_ENTER && !started){
@@ -164,7 +198,9 @@ public class CampoJuego extends javax.swing.JFrame {
                     moverTanqueAux("UP",fTank.getPosX()-1,fTank.getPosY());
                 }else if(e.getKeyChar() == 's' || e.getKeyChar() == 'S'){
                     moverTanqueAux("DOWN",fTank.getPosX()+1,fTank.getPosY());
-                } 
+                }else if(e.getKeyChar() == KeyEvent.VK_SPACE){
+                    new ThreadBala(BulletFactory.createBullet((Tanque)fTank, fTank.getOrientacion(), true), c).start();
+                }  
             }
             @Override
             public void keyPressed(KeyEvent e) {}
@@ -174,7 +210,6 @@ public class CampoJuego extends javax.swing.JFrame {
     }
 
     public boolean validarConTanques(int posX,int posY, Tanque tanqueRecibido){
-        
         for(Tanque eTank : mapaActual.getETanks()){
             if(eTank != tanqueRecibido){
                 if(eTank.getPosX() == posX && eTank.getPosY() == posY){
@@ -206,9 +241,9 @@ public class CampoJuego extends javax.swing.JFrame {
                 }else if(b.getPosX() == posX+1 && b.getPosY() == posY+1 ){
                    return false;
                 }
-                
+        if(!(validarConAgulia(posX, posY)) || !(validarConAgulia(posX+1, posY)) || !(validarConAgulia(posX, posY+1)) || !validarConAgulia(posX+1, posY+1))
+            return false;
         return validarConTanques(posX, posY, tanqueRecibido) && validarConTanques(posX, posY+1, tanqueRecibido) && validarConTanques(posX+1, posY, tanqueRecibido) && validarConTanques(posX+1, posY+1, tanqueRecibido);
-        
     }
     
     public BufferedImage toBufferedImage(Image img) {
@@ -222,7 +257,6 @@ public class CampoJuego extends javax.swing.JFrame {
     }
     
     public void pintarTanque(String ruta,int posX,int posY){
-        System.out.println("Ruta:" + ruta + "x: " + posX + " Y:"+ posY);
         String rutaImagen = ruta; 
         ImageIcon imagenIcono = new ImageIcon(rutaImagen);
         imagenIcono = resizeGifIcon(imagenIcono, 60, 60);
@@ -281,11 +315,13 @@ public class CampoJuego extends javax.swing.JFrame {
         pintarTanque(aguila.getImagen(), aguila.getPosX(), aguila.getPosY());
         for(Bloque b : mapaActual.getBloques()){
             if(b.getPosX() != -1 && b.getPosY() != -1 ){
+                
                 JLabel lb = new JLabel("");
                 lb.setForeground(Color.red);
                 cambiarImagenDeLabel(b.getImagen(), lb);
                 lb.setLocation(b.getPosY()*30,b.getPosX()*30);
                 lb.setSize(30,30);
+                b.setLbl(lb);
                 pnlCampo.add(lb);
                 pnlCampo.revalidate();
                 pnlCampo.repaint();
@@ -293,6 +329,7 @@ public class CampoJuego extends javax.swing.JFrame {
             }
         }
     }
+    
     public void buildMapa(){
         pintarTanque(fTank.getImages()[fTank.getPosImagen(fTank.getOrientacion())], fTank.getPosX(), fTank.getPosY());
         for(Tanque eTank : mapaActual.getETanks())
@@ -307,12 +344,22 @@ public class CampoJuego extends javax.swing.JFrame {
         matriz[posX][posY+1].setIcon(null);
         matriz[posX+1][posY+1].setIcon(null);
     }
+    
+    public boolean puntoUsado(int posX,int posY){
+        for(Bloque b:mapaActual.getBloques())
+            if(b.getPosX() == posX && b.getPosY() == posY)
+                return true;
+        for(Tanque t:mapaActual.getETanks())
+            if(dentroTanque(posX, posY, t))
+                return true;
+        return false;
+    }
      
     public int[] getPosLibreEnemigo(){
         int[] pos = new int[2];
         for (int i = 0; i < 25; i++)
             for (int j = 0; j < 25; j++) 
-                if(matriz[i][j].getIcon() == null && matriz[i+1][j].getIcon() == null && matriz[i][j+1].getIcon() == null && matriz[i+1][j+1].getIcon() == null){
+                if(!puntoUsado(i, j)&&!puntoUsado(i, j+1)&&!puntoUsado(i+1, j)&&!puntoUsado(i+1, j+1)){
                     pos[0] = i;
                     pos[1] = j;
                     return pos;
@@ -321,19 +368,22 @@ public class CampoJuego extends javax.swing.JFrame {
         pos[1] = -1;                
         return pos;
     }
+
+    public FriendlyTank getfTank() {
+        return fTank;
+    }
     
     public void generarEnemigo(String tipo){
         EnemyTank eTank = gestorETank.getClon(tipo);
-        mapaActual.addTanque(eTank);
         int[] pos = getPosLibreEnemigo();
         eTank.setPosX(pos[0]);
         eTank.setPosY(pos[1]);
-        eTank.setVelocidadDisparo(configuracion.getVelocidadDisparo());
-        eTank.setVelocidadMovimiento(configuracion.getVelocidadMovimiento());
+        eTank.setVelocidadDisparo(configuracion.getVelDips(eTank.getTipo()));
+        eTank.setVelocidadMovimiento(configuracion.getVelMov(eTank.getTipo()));
         eTank.setOrientacion("DOWN");
         pintarTanque(eTank.getImages()[eTank.getPosImagen(eTank.getOrientacion())], eTank.getPosX(), eTank.getPosY());
         mapaActual.addTanque((Tanque)eTank);
-        ThreadTanqueEnemigo tte = new ThreadTanqueEnemigo(this, eTank);
+        ThreadTanqueEnemigo tte = new ThreadTanqueEnemigo(this, eTank, configuracion);
         tte.start();
         enemigos.add(tte);
     }
@@ -344,6 +394,59 @@ public class CampoJuego extends javax.swing.JFrame {
                 new CampoJuego().setVisible(true);
             }
         });
+    }
+    
+    public Bloque estaBloque(int px, int py){
+        for (int i = 0; i < mapaActual.getBloques().size(); i++) {
+            Bloque get = mapaActual.getBloques().get(i);
+            if (px == get.getPosX() && py == get.getPosY()) 
+                return get;
+        }
+        return null;
+    }
+    
+    public ThreadTanqueEnemigo estaTanque(int px, int py){
+        for (int i = 0; i < enemigos.size(); i++) {
+            ThreadTanqueEnemigo get = enemigos.get(i);
+            if (dentroTanque(px, py, get.getTanque())) {
+                return get;
+            }
+        }
+        return null;
+    }
+    
+    public boolean estaAguila(int px, int py){
+        return dentroAguila(px, py, mapaActual.getAguila());
+    }
+    
+    public boolean estaFTanque(int px, int py){
+        return dentroTanque(px,py,fTank);
+    }
+    
+    public boolean dentroTanque(int posX,int posY, Tanque t){
+        return (t.getPosX() == posX && t.getPosY() == posY) || (t.getPosX()+1 == posX && t.getPosY() == posY) || (t.getPosX() == posX && t.getPosY()+1 == posY) || (t.getPosX()+1 == posX && t.getPosY()+1 == posY);
+    }
+    
+    public boolean dentroAguila(int posX,int posY, Bloque a){
+        return (a.getPosX() == posX && a.getPosY() == posY) || (a.getPosX()+1 == posX && a.getPosY() == posY) || (a.getPosX() == posX && a.getPosY()+1 == posY) || (a.getPosX()+1 == posX && a.getPosY()+1 == posY);
+    }
+    
+    public ArrayList<ThreadTanqueEnemigo> getEnemigos() {
+        return enemigos;
+    }
+    
+    public boolean validarConAgulia(int posX,int posY){
+        Bloque eagle = mapaActual.getAguila();
+        if(eagle.getPosX() == posX && eagle.getPosY() == posY){
+            return false;
+        }else if(eagle.getPosX() == posX && eagle.getPosY()+1 == posY){
+            return false;
+        }else if(eagle.getPosX()+1 == posX && eagle.getPosY() == posY){
+            return false;
+        }else if(eagle.getPosX()+1 == posX && eagle.getPosY()+1 == posY){
+            return false;
+        }else
+            return true;
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

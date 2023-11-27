@@ -1,28 +1,42 @@
 
 package GestorEnemyTank;
 
+import Bala.BulletFactory;
+import Bala.ThreadBala;
+import ConfigurationManager.ConfigurationManager;
 import GUI.CampoJuego;
+import Tanque.Tanque;
 import java.awt.Point;
-import java.time.Duration;
 import java.util.ArrayList;
 
 
 public class ThreadTanqueEnemigo extends Thread{
     CampoJuego ventana;
     EnemyTank tank;
+    ConfigurationManager config;
     boolean isRunnig = true, isPaused = false;
-    public ThreadTanqueEnemigo(CampoJuego ventana, EnemyTank tank) {
+    public ThreadTanqueEnemigo(CampoJuego ventana, EnemyTank tank, ConfigurationManager config) {
         this.ventana = ventana;
         this.tank = tank;
+        this.config = config;
     }
     
     public void run(){
         try {
-            while (isRunnig) {                
-                System.out.println("");
-                moverse();
-                sleep(2000);
-                while (isPaused) {                    
+            int contDisp = tank.getVelocidadDisparo(), contMov = tank.getVelocidadMovimiento();
+            while (isRunnig) {   
+                contDisp-=1000;
+                if (contDisp <= 0) {
+                    disparar();
+                    contDisp = tank.getVelocidadDisparo(); 
+                }
+                contMov-=1000;
+                if (contMov <= 0){
+                    moverse();
+                    contMov = tank.getVelocidadMovimiento(); 
+                }
+                sleep(1000);
+                while (isPaused) {
                     sleep(10000);
                     isPaused = false;
                 }
@@ -35,9 +49,9 @@ public class ThreadTanqueEnemigo extends Thread{
     
     public String getOrientacion(int oX, int oY, int nX, int nY){
         if (oX<nX) {
-            return "UP";
-        }else if(oX>nX){
             return "DOWN";
+        }else if(oX>nX){
+            return "UP";
         }else if(oY<nY){
             return "RIGHT";
         }else if(oY>nY){
@@ -47,21 +61,34 @@ public class ThreadTanqueEnemigo extends Thread{
     }
     public void moverse(){
         ArrayList<Point> puntos = tank.sortPossibleMoves(tank.setPossibleMoves(1), 24, 12);
-        System.out.println(puntos);
         for (int i = 0; i < puntos.size(); i++) {
             Point get = puntos.get(i);
             if (ventana.validarMovimiento(get.x, get.y,tank)){
-                System.out.println("flag 2");
                 ventana.limpiarMapa(tank.getPosX(), tank.getPosY());
                 String orientacion = getOrientacion(tank.getPosX(),tank.getPosY(),get.x,get.y);
-                System.out.println("X:"+get.x+", Y:"+get.y+" Orient:"+orientacion);
                 tank.setPosX(get.x);
                 tank.setPosY(get.y);
-                System.out.println("Pos tank after set: "+ tank.getPosX()+" , " + tank.getPosY());
                 ventana.buildMapa();
                 ventana.pintarTanque(tank.getImages()[tank.getPosImagen(orientacion)], tank.getPosX(), tank.getPosY());
             }
         }
             
     }
+
+    public EnemyTank getTanque() {
+        return tank;
+    }
+    
+    public void disparar(){
+        new ThreadBala(BulletFactory.createBullet((Tanque)tank, tank.getOrientacion(), false), ventana).start();
+    }
+    
+    public void setIsRunnig(boolean isRunnig) {
+        this.isRunnig = isRunnig;
+    }
+
+    
+    
+    
+    
 }
